@@ -1,0 +1,43 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>New Product</h1>
+</div>
+
+<div id="error-message" class="error-banner" style="display: none;">
+    Something went wrong. Please check your input.
+</div>
+
+<form class="product-form" onsubmit="createProduct(event)">
+    <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" required placeholder="Product name">
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3" placeholder="Optional description"></textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="price">Price ($) *</label>
+            <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Quantity *</label>
+            <input type="number" id="quantity" name="quantity" min="0" required placeholder="0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category" placeholder="e.g., electronics, furniture">
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create Product</button>
+        <a href="/" class="btn">Cancel</a>
+    </div>
+</form>
+{{end}}

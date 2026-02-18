@@ -1,0 +1,49 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>{{.Product.Name}}</h1>
+    <div class="header-actions">
+        <button onclick="deleteProduct({{.Product.ID}})" class="btn btn-danger">Delete</button>
+    </div>
+</div>
+
+<div class="product-detail">
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Price</label>
+            <span class="detail-value price">${{printf "%.2f" .Product.Price}}</span>
+        </div>
+        <div class="detail-item">
+            <label>Category</label>
+            <span class="detail-value">{{.Product.Category}}</span>
+        </div>
+        <div class="detail-item">
+            <label>Stock Status</label>
+            <span class="detail-value">
+                {{if .Product.InStock}}
+                    <span class="badge badge-success">In Stock</span>
+                {{else}}
+                    <span class="badge badge-danger">Out of Stock</span>
+                {{end}}
+            </span>
+        </div>
+        <div class="detail-item">
+            <label>Quantity</label>
+            <span class="detail-value" id="product-quantity">{{.Product.Quantity}}</span>
+        </div>
+    </div>
+
+    {{if .Product.Description}}
+    <div class="detail-description">
+        <label>Description</label>
+        <p>{{.Product.Description}}</p>
+    </div>
+    {{end}}
+
+    <div class="detail-actions">
+        {{if .Product.InStock}}
+        <button onclick="purchaseProduct({{.Product.ID}})" class="btn btn-primary">Purchase</button>
+        {{end}}
+        <a href="/" class="btn">← Back to Products</a>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,45 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Products</h1>
+    <a href="/new" class="btn btn-primary">+ New Product</a>
+</div>
+
+{{if .Products}}
+<table class="product-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>In Stock</th>
+            <th>Quantity</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Products}}
+        <tr>
+            <td>
+                <a href="/products/{{.ID}}">{{.Name}}</a>
+            </td>
+            <td class="price">${{printf "%.2f" (div .Price 100)}}</td>
+            <td>{{.Category}}</td>
+            <td>
+                {{if .InStock}}
+                    <span class="badge badge-success">In Stock</span>
+                {{else}}
+                    <span class="badge badge-danger">Out of Stock</span>
+                {{end}}
+            </td>
+            <td>{{.Quantity}}</td>
+            <td>
+                <a href="/products/{{.ID}}" class="btn btn-sm">View</a>
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{else}}
+<p class="empty-state">No products found. <a href="/new">Create one</a>.</p>
+{{end}}
+{{end}}
