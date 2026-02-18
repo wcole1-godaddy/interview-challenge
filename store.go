@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type Store struct {
@@ -21,7 +22,7 @@ type cachedProduct struct {
 }
 
 func NewStore(dbPath string) (*Store, error) {
-	db, err := sql.Open("sqlite3", dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
+	db, err := sql.Open("sqlite", dbPath+"?_journal_mode=WAL&_busy_timeout=5000")
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}
@@ -34,10 +35,28 @@ func NewStore(dbPath string) (*Store, error) {
 		return nil, fmt.Errorf("create tables: %w", err)
 	}
 
-	return &Store{
+	store := &Store{
 		db:           db,
 		productCache: make(map[int]cachedProduct),
-	}, nil
+	}
+
+	if err := createReviewTable(store); err != nil {
+		return nil, fmt.Errorf("create review table: %w", err)
+	}
+
+	if err := createAuditTable(store); err != nil {
+		return nil, fmt.Errorf("create audit table: %w", err)
+	}
+
+	if err := createVariantTable(store); err != nil {
+		return nil, fmt.Errorf("create variant table: %w", err)
+	}
+
+	if err := seedData(db); err != nil {
+		return nil, fmt.Errorf("seed data: %w", err)
+	}
+
+	return store, nil
 }
 
 func createTables(db *sql.DB) error {
@@ -57,6 +76,85 @@ func createTables(db *sql.DB) error {
 		)
 	`)
 	return err
+}
+
+func seedData(db *sql.DB) error {
+	var count int
+	err := db.QueryRow(`SELECT COUNT(*) FROM products`).Scan(&count)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+
+	log.Println("Seeding database with sample products...")
+
+	now := time.Now().UTC()
+	seeds := []struct {
+		name, desc    string
+		priceCents    int
+		category      string
+		inStock       bool
+		quantity      int
+	}{
+		{"Wireless Mouse", "Ergonomic wireless mouse with USB receiver", 2499, "electronics", true, 25},
+		{"Mechanical Keyboard", "Cherry MX Blue switches, full-size layout", 8999, "electronics", true, 12},
+		{"USB-C Hub", "7-in-1 USB-C adapter with HDMI and ethernet", 3499, "electronics", true, 0},
+		{"Standing Desk", "Electric sit-stand desk, 60 inch wide", 49999, "furniture", false, 8},
+		{"Monitor Arm", "Single monitor mount, gas spring, VESA compatible", 4999, "furniture", true, 0},
+		{"Notebook Pack", "200-page lined notebooks, pack of 3", -500, "office", true, 50},
+		{"Desk Lamp", "LED desk lamp with adjustable brightness", 3299, "office", true, 15},
+		{"Webcam HD", "1080p webcam with built-in microphone", 5999, "electronics", true, 3},
+	}
+
+	for _, s := range seeds {
+		_, err := db.Exec(
+			`INSERT OR IGNORE INTO products (name, description, price_cents, category, in_stock, quantity, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			s.name, s.desc, s.priceCents, s.category, s.inStock, s.quantity, now, now,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Seed variants for select products.
+	var variantCount int
+	db.QueryRow(`SELECT COUNT(*) FROM variants`).Scan(&variantCount)
+	if variantCount == 0 {
+		variantSeeds := []struct {
+			productID  int
+			sku, name  string
+			priceCents int
+			quantity   int
+			attrs      string
+			sortOrder  int
+		}{
+			{1, "WM-BLK", "Wireless Mouse - Black", 2499, 10, `{"color":"black"}`, 1},
+			{1, "WM-WHT", "Wireless Mouse - White", 2499, 8, `{"color":"white"}`, 2},
+			{1, "WM-BLU", "Wireless Mouse - Blue", 2699, 7, `{"color":"blue"}`, 3},
+			{2, "KB-FULL", "Mechanical Keyboard - Full Size", 8999, 6, `{"size":"full"}`, 1},
+			{2, "KB-TKL", "Mechanical Keyboard - Tenkeyless", 7999, 4, `{"size":"tenkeyless"}`, 2},
+			{2, "KB-65", "Mechanical Keyboard - 65%", 8499, 2, `{"size":"65%"}`, 3},
+			{4, "SD-48", "Standing Desk - 48 inch", 39999, 3, `{"width":"48in"}`, 1},
+			{4, "SD-60", "Standing Desk - 60 inch", 49999, 5, `{"width":"60in"}`, 2},
+			{4, "SD-72", "Standing Desk - 72 inch", 59999, 0, `{"width":"72in"}`, 3},
+		}
+
+		for _, v := range variantSeeds {
+			inStock := v.quantity > 0
+			_, err := db.Exec(
+				`INSERT OR IGNORE INTO variants (product_id, sku, name, price_cents, quantity, in_stock, attributes, sort_order, created_at, updated_at)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				v.productID, v.sku, v.name, v.priceCents, v.quantity, inStock, v.attrs, v.sortOrder, now, now,
+			)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *Store) Close() error {
@@ -131,6 +229,11 @@ func (s *Store) CreateProduct(name, description string, priceCents int, category
 		return 0, fmt.Errorf("price must be non-negative")
 	}
 
+	if len(description) > 128 {
+		log.Printf("WARN: description for %q truncated from %d to 128 characters", name, len(description))
+		description = description[:128]
+	}
+
 	now := time.Now().UTC()
 	result, err := s.db.Exec(
 		`INSERT INTO products (name, description, price_cents, category, in_stock, quantity, created_at, updated_at)
@@ -195,10 +298,19 @@ func (s *Store) DeleteProduct(id int) error {
 
 // DecrementQuantity decreases quantity by 1 and updates in_stock.
 func (s *Store) DecrementQuantity(id int) error {
+	var currentQty int
+	err := s.db.QueryRow(`SELECT quantity FROM products WHERE id = ?`, id).Scan(&currentQty)
+	if err != nil {
+		return err
+	}
+
+	newQty := currentQty - 1
+	inStock := newQty > 0
 	now := time.Now().UTC()
-	_, err := s.db.Exec(
-		`UPDATE products SET quantity = quantity - 1, in_stock = (quantity - 1 > 0), updated_at = ? WHERE id = ?`,
-		now, id,
+
+	_, err = s.db.Exec(
+		`UPDATE products SET quantity = ?, in_stock = ?, updated_at = ? WHERE id = ?`,
+		newQty, inStock, now, id,
 	)
 	return err
 }

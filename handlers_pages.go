@@ -99,6 +99,15 @@ func (s *Server) handlePageProductDetail(w http.ResponseWriter, r *http.Request)
 
 	apiProduct := toAPIProduct(product)
 
+	variants, err := s.store.ListVariants(id)
+	if err != nil {
+		variants = nil
+	}
+	apiVariants := make([]Variant, len(variants))
+	for i, v := range variants {
+		apiVariants[i] = toAPIVariant(&v)
+	}
+
 	tmpl, err := s.loadTemplate("layout.html", "product_detail.html")
 	if err != nil {
 		http.Error(w, "template error: "+err.Error(), http.StatusInternalServerError)
@@ -106,8 +115,9 @@ func (s *Server) handlePageProductDetail(w http.ResponseWriter, r *http.Request)
 	}
 
 	data := map[string]interface{}{
-		"Product": apiProduct,
-		"Title":   apiProduct.Name,
+		"Product":  apiProduct,
+		"Variants": apiVariants,
+		"Title":    apiProduct.Name,
 	}
 
 	if err := tmpl.ExecuteTemplate(w, "layout", data); err != nil {

@@ -1,0 +1,58 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{.TotalProducts}}</div>
+        <div class="stat-label">Total Products</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{.TotalInStock}}</div>
+        <div class="stat-label">In Stock</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{.TotalOutOfStock}}</div>
+        <div class="stat-label">Out of Stock</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">${{printf "%.2f" .AveragePrice}}</div>
+        <div class="stat-label">Average Price</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{.TotalInventory}}</div>
+        <div class="stat-label">Total Inventory</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{.TotalReviews}}</div>
+        <div class="stat-label">Total Reviews</div>
+    </div>
+</div>
+
+{{if .Categories}}
+<h2 class="section-title">Categories</h2>
+<table class="product-table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Products</th>
+            <th>Avg Price</th>
+            <th>Total Inventory</th>
+            <th>In Stock</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Categories}}
+        <tr>
+            <td>{{.Category}}</td>
+            <td>{{.ProductCount}}</td>
+            <td class="price">${{printf "%.2f" (div .AveragePrice 100)}}</td>
+            <td>{{.TotalInventory}}</td>
+            <td>{{.InStockCount}}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{end}}
+{{end}}

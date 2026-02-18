@@ -46,4 +46,50 @@
         <a href="/" class="btn">← Back to Products</a>
     </div>
 </div>
+
+{{if .Variants}}
+<div class="variants-section">
+    <h2>Variants</h2>
+    <table class="product-table">
+        <thead>
+            <tr>
+                <th>Variant</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Quantity</th>
+                <th>Attributes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Variants}}
+            <tr>
+                <td class="variant-name">{{.Name}}</td>
+                <td><code>{{.SKU}}</code></td>
+                <td class="price">${{printf "%.2f" .Price}}</td>
+                <td>
+                    {{if .InStock}}
+                        <span class="badge badge-success">In Stock</span>
+                    {{else}}
+                        <span class="badge badge-danger">Out of Stock</span>
+                    {{end}}
+                </td>
+                <td><span class="variant-qty" id="variant-qty-{{.ID}}">{{.Quantity}}</span></td>
+                <td>
+                    {{range $key, $val := .Attributes}}
+                        <span class="attribute-tag">{{$key}}: {{$val}}</span>
+                    {{end}}
+                </td>
+                <td>
+                    {{if .InStock}}
+                    <button onclick="purchaseVariant({{.ProductID}}, {{.ID}})" class="btn btn-sm btn-primary">Buy</button>
+                    {{end}}
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{end}}
 {{end}}

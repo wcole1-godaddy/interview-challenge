@@ -292,3 +292,149 @@ body {
     display: flex;
     gap: 0.5rem;
 }
+
+/* Stats dashboard */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 6px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1B2A4A;
+    font-family: "SF Mono", Monaco, monospace;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #999;
+    margin-top: 0.25rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    color: #1B2A4A;
+    margin-bottom: 1rem;
+}
+
+/* Reviews */
+.reviews-section {
+    margin-top: 2rem;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 1.5rem;
+}
+
+.reviews-section h2 {
+    font-size: 1.1rem;
+    color: #1B2A4A;
+    margin-bottom: 1rem;
+}
+
+.review-card {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.review-author {
+    font-weight: 600;
+    color: #333;
+}
+
+.review-rating {
+    color: #f9a825;
+    font-size: 0.9rem;
+}
+
+.review-comment {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.review-meta {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.5rem;
+}
+
+.review-form {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.review-form h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: #555;
+}
+
+.rating-select {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.rating-select label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ddd;
+    transition: color 0.15s;
+}
+
+.rating-select input:checked ~ label,
+.rating-select label:hover {
+    color: #f9a825;
+}
+
+/* Variants */
+.variants-section {
+    margin-top: 2rem;
+}
+
+.variants-section h2 {
+    font-size: 1.1rem;
+    color: #1B2A4A;
+    margin-bottom: 1rem;
+}
+
+.variant-name {
+    font-weight: 500;
+}
+
+.attribute-tag {
+    display: inline-block;
+    background: #e8eaf6;
+    color: #3949ab;
+    padding: 0.1rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.25rem;
+}
+
+.variant-qty {
+    font-family: "SF Mono", Monaco, monospace;
+}

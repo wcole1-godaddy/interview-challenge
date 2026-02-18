@@ -1,6 +1,6 @@
 # Product Catalog Interview Challenge
 
-This repository is a small Go web application for managing products.
+A Go web application for managing a product catalog with variants, reviews, and inventory tracking.
 
 Your task is to use your normal engineering workflow (including AI tools if you want) to identify, fix, and validate defects in this codebase.
 
@@ -11,7 +11,6 @@ Deliver production-quality fixes with clear validation. Focus on correctness, no
 ## Requirements
 
 - Go 1.21+
-- CGO-enabled Go toolchain (required by `github.com/mattn/go-sqlite3`)
 
 ## Getting Started
 
@@ -24,14 +23,45 @@ Deliver production-quality fixes with clear validation. Focus on correctness, no
    go run .
    ```
 3. Open:
-   - UI: `http://localhost:8080/`
-   - API: `http://localhost:8080/products`
+   - **UI:** http://localhost:8080/
+   - **Dashboard:** http://localhost:8080/stats
+   - **API:** http://localhost:8080/products
 
-Optional: use a custom DB path so you can reset easily between runs.
+The app will create a `catalog.db` SQLite database and seed it with sample data on first run.
+
+**Tip:** Use a custom DB path so you can reset easily between runs:
 
 ```bash
 DB_PATH=/tmp/product-catalog.db go run .
 ```
+
+To reset the database, delete the file and restart.
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/products` | List all products (optional `?category=`) |
+| `POST` | `/products` | Create a product |
+| `GET` | `/products/:id` | Get a product |
+| `PUT` | `/products/:id` | Update a product |
+| `DELETE` | `/products/:id` | Soft-delete a product |
+| `POST` | `/products/:id/purchase` | Purchase (decrement stock) |
+| `GET` | `/products/:id/variants` | List variants for a product |
+| `POST` | `/products/:id/variants` | Create a variant |
+| `GET` | `/products/:id/variants/:vid` | Get a variant |
+| `PUT` | `/products/:id/variants/:vid` | Update a variant |
+| `DELETE` | `/products/:id/variants/:vid` | Delete a variant |
+| `POST` | `/products/:id/variants/:vid/purchase` | Purchase a variant |
+| `GET` | `/products/:id/inventory` | Variant inventory summary |
+| `GET` | `/products/:id/reviews` | List reviews |
+| `POST` | `/products/:id/reviews` | Create a review |
+| `GET` | `/products/export` | Export products as CSV |
+| `GET` | `/products/stats` | Catalog statistics |
+| `GET` | `/search?q=` | Search products |
+| `GET` | `/categories` | List categories |
+| `GET` | `/sku/:sku` | Look up variant by SKU |
+| `GET` | `/health` | Health check |
 
 ## What To Do
 
